@@ -1,6 +1,5 @@
 import '../css/main.css'
 
-
 function Home(){
     return(
         <main>

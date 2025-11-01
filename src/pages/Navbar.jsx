@@ -1,6 +1,56 @@
 import '../css/main.css'
+import { useState, useEffect } from "react";
+
+const calcularNumerito = () => {
+    const productosEnCarritoLS = localStorage.getItem("productos-en-carrito");
+    let productos = [];
+    if (productosEnCarritoLS) {
+        try {
+            productos = JSON.parse(productosEnCarritoLS);
+        } catch (error) {
+            console.error("Error al parsear el carrito desde localStorage:", error);
+            productos = [];
+        }
+    }
+    return productos.reduce((acc, producto) => acc + (producto.cantidad || 0), 0);
+};
 
 function Navbar(){
+    const [numerito, setNumerito] = useState(calcularNumerito());
+    useEffect(() => {
+        // Función que actualiza el estado 'numerito'
+        const actualizarNumerito = () => {
+            setNumerito(calcularNumerito());
+        };
+
+        // 1. Escuchar el evento 'storage' para cambios externos (ej. desde otra pestaña/ventana)
+        window.addEventListener('storage', actualizarNumerito);
+
+        // 2. Crear un observador de cambios en 'localStorage' (ya que el evento 'storage' no funciona para la misma pestaña)
+        // La lógica de 'main.js' y 'carrito.js' DEBE llamar a una función para actualizar el 'numerito'
+        // después de cada acción (agregar, eliminar, vaciar).
+        
+        // La forma más simple, asumiendo que tu JS externo actualiza el 'numerito' en el DOM:
+        const observerTarget = document.getElementById("numerito");
+        if (observerTarget) {
+            const observer = new MutationObserver(actualizarNumerito);
+            // Observar solo cambios en el contenido de texto
+            observer.observe(observerTarget, { childList: true, subtree: true, characterData: true });
+
+            // Limpieza al desmontar
+            return () => {
+                window.removeEventListener('storage', actualizarNumerito);
+                observer.disconnect();
+            };
+        }
+        
+        // Si no se encuentra el elemento, limpiamos solo el listener de storage
+        return () => {
+            window.removeEventListener('storage', actualizarNumerito);
+        };
+
+    }, []);
+
     return(
         <div className="wrapper">
         <aside>
@@ -10,10 +60,10 @@ function Navbar(){
             <nav>
                 <ul className="menu">
                     <li>
-                        <button id="todos" className="boton-menu boton-categoria active"><i className="bi bi-caret-right-fill"></i><a href="/"> menu</a></button>
+                        <a href="/"> <button id="todos" className="boton-menu boton-categoria active"><i className="bi bi-caret-right-fill"></i>menu</button></a>
                     </li>
                     <li>
-                        <button id="todos" className="boton-menu boton-categoria"><i className="bi bi-caret-right-fill"></i> <a href="/productos"> Productos </a></button>
+                        <a href="/productos"> <button id="todos" className="boton-menu boton-categoria"><i className="bi bi-caret-right-fill"></i> Productos </button></a>
                     </li>
                     <li>
                         <button id="torta" className="boton-menu boton-categoria"><i className="bi bi-caret-right"></i> Tortas</button>
@@ -28,7 +78,7 @@ function Navbar(){
                         <button id="especiales" className="boton-menu boton-categoria"><i className="bi bi-caret-right"></i> Especiales</button>
                     </li>
                     <li>
-                        <button id="nostros" className="boton-menu boton-categoria"><i className="bi bi-caret-right"></i><a href="/nosotros">Nosotros</a></button>
+                        <a href="/nosotros"> <button id="nostros" className="boton-menu boton-categoria"><i className="bi bi-caret-right"></i>Nosotros</button></a>
                     </li>
                     <li>
                         <button id="contacto" className="boton-menu boton-categoria"><i className="bi bi-caret-right"></i><a href="/contacto">Contacto</a></button>
@@ -38,7 +88,7 @@ function Navbar(){
                     </li>
                     <li>
                         <a className="boton-menu boton-carrito" href="/carrito">
-                            <i className="bi bi-cart-fill"></i> Carrito <span id="numerito" className="numerito">0</span></a>
+                            <i className="bi bi-cart-fill"></i> Carrito <span id="numerito" className="numerito">{numerito}</span></a>
                     </li>
                 </ul>
             </nav>

@@ -6,6 +6,9 @@ import Nosotros from './pages/Nosotros'
 import Blogs from './pages/Noticias'
 import Carrito from './pages/Carrito'
 import Login from './pages/Login'
+import Admin from './pages/Admin'
+import Boleta from './pages/Boletas'
+import UsuarioPerfiles from './pages/UsuarioPerfiles'
 import { Route,Routes,BrowserRouter as Router } from 'react-router-dom'
 import './css/main.css'
 
@@ -27,6 +30,9 @@ function App() {
           <Route path='/blogs' element={<Blogs/>}></Route>
           <Route path='/carrito' element={<Carrito/>}></Route>
           <Route path='/login' element={<Login/>}></Route>
+          <Route path='/admin' element={<Admin/>}></Route>
+          <Route path='/boletas' element={<Boleta/>}></Route>
+          <Route path='/usuarioperfiles' element={<UsuarioPerfiles/>}></Route>
         </Routes>
         </main>
       </Router>

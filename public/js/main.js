@@ -259,7 +259,7 @@ const productos = [
 const contenedorProductos = document.querySelector("#contenedor-productos");
 const botonesMenu = document.querySelectorAll(".boton-categoria");
 const tituloPrincipal = document.querySelector("#titulo-principal");
-const numerito = document.querySelector("#numerito");
+const numeritoElemento = document.querySelector("#numerito");
 let botonesAgregar = document.querySelectorAll(".producto-agregar");
 
 // =======================================
@@ -301,10 +301,12 @@ function actualizarBotonesAgregar() {
  * Actualiza el número mostrado en el icono del carrito
  */
 function actualizarNumerito() {
-    let nuevoNumerito = productosEnCarrito.reduce((acc, producto) => acc + producto.cantidad, 0);
-    numerito.innerText = nuevoNumerito;
-}
 
+    if (numeritoElemento) {
+        const nuevoNumerito = productosEnCarrito.reduce((acc, p) => acc + p.cantidad, 0); 
+        numeritoElemento.innerText = nuevoNumerito;
+    }
+}
 // =======================================
 // GESTIÓN DEL CARRITO DE COMPRAS
 // =======================================

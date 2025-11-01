@@ -1,3 +1,4 @@
+// --- REGISTRO DE NUEVOS USUARIOS ---
 document.getElementById("form-registro").addEventListener("submit", function(e) {
     e.preventDefault();
 
@@ -21,14 +22,18 @@ document.getElementById("form-registro").addEventListener("submit", function(e) 
         return;
     }
 
+    // Agregar nuevo usuario
     usuarios.push({ username: user, password: pass, role: role });
     localStorage.setItem("usuarios", JSON.stringify(usuarios));
 
     mensaje.textContent = "Usuario registrado correctamente como " + role;
     mensaje.style.color = "green";
 
-    // Limpiar formulario
-    e.target.reset();
+    // Limpiar el formulario después de registrar
+    setTimeout(() => {
+        e.target.reset();
+        mensaje.textContent = "";
+    }, 1500);
 });
 
 
@@ -42,17 +47,29 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
 
     let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
 
-    // Buscar usuario en la base local
+    // Buscar usuario en localStorage
     const usuarioEncontrado = usuarios.find(u => u.username === user && u.password === pass);
 
     if (usuarioEncontrado) {
+        // Guardar usuario logueado
         localStorage.setItem("usuarioLogueado", JSON.stringify(usuarioEncontrado));
 
         mensaje.style.color = "green";
         mensaje.textContent = `Bienvenido ${user} (${usuarioEncontrado.role})`;
+
+        //Limpiar el formulario antes de redirigir
+        e.target.reset();
+
+        //Redirigir según el rol
+        setTimeout(() => {
+            if (usuarioEncontrado.role === "ADMIN") {
+                window.location.href = "admin.html";  // vista administrador
+            } else {
+                window.location.href = "index.html";  // vista usuario normal
+            }
+        }, 1000);
     } else {
         mensaje.style.color = "red";
         mensaje.textContent = "Usuario o contraseña incorrectos";
     }
-
 });

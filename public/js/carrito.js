@@ -57,11 +57,11 @@ function cargarProductosCarrito() {
             div.classList.add("carrito-producto");
             div.innerHTML = `
                 <img class="carrito-producto-imagen" src="${producto.imagen}" alt="${producto.titulo}">
-                <div class="carrito-producto-titulo"> 
+                <div class="h3-carrito"> 
                     <small>Título</small>
-                    <h3>${producto.titulo}</h3>
+                    <h3 class="h3-carrito">${producto.titulo}</h3>
                 </div>
-                <div class="carrito-producto-cantidad">
+                <div class="h3-carrito">
                     <small>Cantidad</small>
                     <div class="carrito-producto-cantidad-controles">
                         <button id="${producto.id}" class="carrito-producto-restar">-</button>
@@ -69,11 +69,11 @@ function cargarProductosCarrito() {
                         <button id="${producto.id}" class="carrito-producto-sumar">+</button>
                     </div>
                 </div>
-                <div class="carrito-producto-precio">
+                <div class="h3-carrito">
                     <small>Precio</small>
                     <p>$${producto.precio.toLocaleString()}</p>
                 </div>
-                <div class="carrito-producto-subtotal">
+                <div class="h3-carrito">
                     <small>Subtotal</small>
                     <p>$${(producto.precio * producto.cantidad).toLocaleString()}</p>
                 </div>
@@ -198,19 +198,19 @@ function eliminarProductoCompleto(e) {
 }
 
 // Elimina un producto del carrito (una unidad)
-function eliminarDelCarrito(e) {
-    const idBoton = e.currentTarget.id;
-    const index = productosEnCarrito.findIndex(producto => producto.id === idBoton);
+// function eliminarDelCarrito(e) {
+//     const idBoton = e.currentTarget.id;
+//     const index = productosEnCarrito.findIndex(producto => producto.id === idBoton);
     
-    if (index !== -1) {
-        productosEnCarrito.splice(index, 1);
-        actualizarLocalStorage();
-        cargarProductosCarrito();
+//     if (index !== -1) {
+//         productosEnCarrito.splice(index, 1);
+//         actualizarLocalStorage();
+//         cargarProductosCarrito();
         
-        // Actualizar numerito en main.js si existe
-        actualizarNumeritoCarrito();
-    }
-}
+//         // Actualizar numerito en main.js si existe
+//         actualizarNumeritoCarrito();
+//     }
+// }
 
 // Vacía completamente el carrito
 function vaciarCarrito() {

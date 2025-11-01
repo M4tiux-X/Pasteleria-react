@@ -218,6 +218,13 @@ main {
 
 
 /**CARRITO */
+
+.h3-carrito{
+    color: #181412;
+}
+
+
+
 .contenedor-carrito {
     display: flex;
     flex-direction: column;
