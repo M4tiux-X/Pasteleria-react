@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap');
 
+.letras{
+    color: #000;
+}
+
 :root {
     --clr-main:#ffaa79b1;
     --crl-main-dark:#a73f03b1;
@@ -229,6 +233,11 @@ main {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+}
+
+.contenedor-carrito p {
+    color: var(--crl-main-2);
+    font-weight: 500;
 }
 
 .carrito-productos {

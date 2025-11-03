@@ -60,10 +60,7 @@ function Navbar(){
             <nav>
                 <ul className="menu">
                     <li>
-                        <a href="/"> <button id="todos" className="boton-menu boton-categoria active"><i className="bi bi-caret-right-fill"></i>menu</button></a>
-                    </li>
-                    <li>
-                        <a href="/productos"> <button id="todos" className="boton-menu boton-categoria"><i className="bi bi-caret-right-fill"></i> Productos </button></a>
+                        <a href="/"> <button id="todos" className="boton-menu boton-categoria"><i className="bi bi-caret-right-fill"></i> Productos </button></a>
                     </li>
                     <li>
                         <button id="torta" className="boton-menu boton-categoria"><i className="bi bi-caret-right"></i> Tortas</button>
