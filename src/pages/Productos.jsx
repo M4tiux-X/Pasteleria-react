@@ -1,3 +1,4 @@
+import React from "react";
 import '../css/main.css';
 import { useEffect, useState } from "react";
 import { productos as catalogo } from '../data/Productos';

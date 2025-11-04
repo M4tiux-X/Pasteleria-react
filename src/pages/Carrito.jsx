@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import "../css/main.css";
+import React from "react";
+
 
 const Carrito = () => {
   const [carrito, setCarrito] = useState(() => {
     return JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
   });
 
-  const [boletas, setBoletas] = useState([]);
+  const [setBoletas] = useState([]);
 
   // Recalcular total
   const total = carrito.reduce(

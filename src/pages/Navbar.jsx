@@ -1,5 +1,7 @@
 import '../css/main.css'
 import { useState, useEffect } from "react";
+import React from "react";
+
 
 const calcularNumerito = () => {
     const productosEnCarritoLS = localStorage.getItem("productos-en-carrito");
@@ -97,4 +99,6 @@ function Navbar(){
     </div>
     )
 }
+// eslint-disable-next-line react-refresh/only-export-components
+export { calcularNumerito };
 export default Navbar;
