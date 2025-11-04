@@ -93,7 +93,7 @@ function Boleta() {
                                         <th>Subtotal</th>
                                     </tr>
                                 </thead>
-                                <body className="body-boleta">
+                                <tbody className="boleta-container ">
                                     {boleta.productos.map((producto, idx) => (
                                         <tr key={`producto-${idx}`}>
                                             <td>{producto.titulo}</td>
@@ -102,7 +102,7 @@ function Boleta() {
                                             <td>${(producto.precio * producto.cantidad).toLocaleString()}</td>
                                         </tr>
                                     ))}
-                                </body>
+                                </tbody>
                             </table>
                             <p className="boleta-total">
                                 <strong>Total:</strong> ${boleta.total.toLocaleString()}

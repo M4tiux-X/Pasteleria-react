@@ -567,12 +567,11 @@ img {
 
 /*Boleta*/
 
-.body-boleta {
+.body-boleta{
     font-family: "Poppins", sans-serif;
     background: #f6f7fb;
-    margin: 0;
-    padding: 40px;
-    display: flex;
+    margin: 0; 
+    display: flex;                          
     justify-content: center;
     color: #000;
     }
@@ -586,6 +585,7 @@ img {
     padding: 24px;
     margin-bottom: 30px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: #000;
     }
     
     .boleta-container:hover {
