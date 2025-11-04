@@ -39,29 +39,29 @@ const Admin = () => {
     <main className="admin-body">
       <div className="admin-contenedor">
         <h1 className="titulo-principal">Panel de Administración</h1>
-        <p>Bienvenido, <strong>{usuario.username}</strong> 👋</p>
-        <p>Tu rol es: <strong>{usuario.role}</strong></p>
+        <p className="info-pasteleria">Bienvenido, <strong>{usuario.username}</strong></p>
+        
 
         <div className="admin-opciones">
-          <button className="boton-admin" onClick={() => navigate("/")}>
-            🏠 Ir al Inicio
+          <button className="boton-admin" onClick={() => navigate("/boletas")}>
+            Boletas/Recibos
           </button>
           <button className="boton-admin" onClick={handleLogout}>
-            🚪 Cerrar Sesión
+            Cerrar Sesión
           </button>
         </div>
 
         <hr />
 
         <section className="admin-seccion">
-          <h2>Gestión de Usuarios</h2>
-          <p>En esta sección podrás administrar los usuarios registrados.</p>
+          <h2 className="titulo-principal">Usuarios</h2>
+          <p className="info-pasteleria">En esta sección podrás administrar los usuarios registrados.</p>
 
           {/* Ejemplo: lista de usuarios almacenados */}
           <ul className="lista-usuarios">
             {JSON.parse(localStorage.getItem("usuarios") || "[]").map((u, index) => (
               <li key={index}>
-                👤 {u.username} — <strong>{u.role}</strong>
+                <a className='info-usuario'><i class="bi bi-person-circle"></i> {u.username} — <strong className>{u.role}</strong></a>
               </li>
             ))}
           </ul>

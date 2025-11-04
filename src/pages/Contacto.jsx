@@ -3,30 +3,6 @@ import React from "react";
 
 const Contacto=()=>{
     return(
-        <div className="wrapper">
-      <aside>
-        <header>
-          <h1 className="logo">Pasteleria Mil Sabores</h1>
-        </header>
-        <nav>
-          <ul className="menu">
-            <li>
-              <a className="boton-menu boton-volver" href="/">
-                <i className="bi bi-caret-right"></i> Volver
-              </a>
-            </li>
-            <li>
-              <a className="boton-menu boton-nostros active" href="/contacto">
-                <i className="bi bi-cart-fill"></i> Contacto
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <footer>
-          <p className="texto-footer">©PasteleriaMilSabores</p>
-        </footer>
-      </aside>
-
       <main>
         <h2 id="titulo-principal" className="titulo-principal">
           Información De Contacto
@@ -53,7 +29,6 @@ const Contacto=()=>{
           title="Mapa ubicación Pastelería Mil Sabores"
         ></iframe>
       </main>
-    </div>
   );
 };
 

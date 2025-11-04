@@ -8,7 +8,7 @@ const Carrito = () => {
     return JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
   });
 
-  const [setBoletas] = useState([]);
+  const [boletas,setBoletas] = useState([]);
 
   // Recalcular total
   const total = carrito.reduce(

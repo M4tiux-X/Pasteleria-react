@@ -1,8 +1,11 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import "../css/main.css";
+import { useNavigate } from "react-router-dom";
 
 function Boleta() {
     const [boletas, setBoletas] = useState([]);
+    const navigate = useNavigate();
 
     // Cargar boletas desde localStorage al montar el componente
     useEffect(() => {
@@ -47,6 +50,11 @@ function Boleta() {
         <main>
             <div className="contenedor-titulo">
                 <h2 className="titulo-principal">Historial de Boletas</h2>
+                <div className="admin-opciones">
+                    <button className="boton-admin" onClick={() => navigate("/admin")}>
+                        Volver
+                    </button>
+                    </div>
                 {boletas.length > 0 && (
                     <button 
                         className="boleta-borrar-todas" 
@@ -56,7 +64,7 @@ function Boleta() {
                 )}
             </div>
 
-            <section className="contenedor-boletas">
+            <section id='boletas-container' className="contenedor-boletas">
                 {boletas.length === 0 ? (
                     <p>No hay boletas registradas.</p>
                 ) : (
@@ -85,7 +93,7 @@ function Boleta() {
                                         <th>Subtotal</th>
                                     </tr>
                                 </thead>
-                                <tbody className="body-boleta">
+                                <body className="body-boleta">
                                     {boleta.productos.map((producto, idx) => (
                                         <tr key={`producto-${idx}`}>
                                             <td>{producto.titulo}</td>
@@ -94,7 +102,7 @@ function Boleta() {
                                             <td>${(producto.precio * producto.cantidad).toLocaleString()}</td>
                                         </tr>
                                     ))}
-                                </tbody>
+                                </body>
                             </table>
                             <p className="boleta-total">
                                 <strong>Total:</strong> ${boleta.total.toLocaleString()}

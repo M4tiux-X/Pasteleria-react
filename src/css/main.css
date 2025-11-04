@@ -669,3 +669,20 @@ img {
     .boletas_letras{
         color: #000;
     }
+
+    .boton-admin{
+        border: 0;
+    background-color: var(--clr-white);
+    color: var(--crl-main-dark);
+    padding: .40rem;
+    text-transform: uppercase;
+    border-radius: 1rem;
+    cursor: pointer;
+    border: 2px solid var(--clr-red);
+    transition: background-color .2s, color .2s;
+    }
+
+    .info-usuario{
+    margin: 10px 20px 30px 40px; 
+    color: var(--crl-main-dark);
+    }
