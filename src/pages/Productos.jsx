@@ -1,34 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import '../css/main.css';
-import { useEffect, useState } from "react";
-import { productos as catalogo } from '../data/Productos';
+import useProductos from "../hooks/useProductos";
 
 const Productos = () => {
+  const { obtenerProductos } = useProductos();
+
   const [productos, setProductos] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("todos");
   const [carrito, setCarrito] = useState(() => {
     return JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
   });
 
-  // Cargar catálogo al montar
+  // === Cargar productos desde el microservicio ===
   useEffect(() => {
-    setProductos(catalogo);
+    obtenerProductos()
+      .then((res) => {
+        setProductos(res.data);  // <-- productos del backend
+      })
+      .catch((err) => {
+        console.error("Error cargando productos:", err);
+      });
   }, []);
 
-  // Guardar carrito en localStorage
+  // === Guardar carrito en localStorage ===
   useEffect(() => {
     localStorage.setItem("productos-en-carrito", JSON.stringify(carrito));
 
-    // Actualizar el numerito del carrito en el Navbar
     const numerito = document.getElementById("numerito");
     if (numerito) {
-      const total = carrito.reduce((acc, p) => acc + p.cantidad, 0);
-      numerito.textContent = total;
+      numerito.textContent = carrito.reduce((acc, p) => acc + p.cantidad, 0);
     }
-
   }, [carrito]);
 
-  // === MANEJO DE BOTONES DE CATEGORÍA (Navbar) ===
+  // === Categorías (Navbar) ===
   useEffect(() => {
     const botones = document.querySelectorAll(".boton-categoria");
 
@@ -36,21 +40,14 @@ const Productos = () => {
       const categoriaId = e.currentTarget.id;
       setCategoriaSeleccionada(categoriaId);
 
-      // Actualizar título
       const titulo = document.getElementById("titulo-principal");
       if (titulo) {
-        if (categoriaId === "todos") {
-          titulo.innerText = "Todos los Productos";
-        } else {
-          // Buscar nombre de categoría legible
-          const prodCat = catalogo.find(p => 
-            p.menu.we.toLowerCase().includes(categoriaId.toLowerCase())
-          );
-          titulo.innerText = prodCat ? prodCat.menu.we : "Categoría";
-        }
+        titulo.innerText =
+          categoriaId === "todos"
+            ? "Todos los Productos"
+            : categoriaId.charAt(0).toUpperCase() + categoriaId.slice(1);
       }
 
-      // Marcar botón activo
       botones.forEach(btn => btn.classList.remove("active"));
       e.currentTarget.classList.add("active");
     };
@@ -59,9 +56,10 @@ const Productos = () => {
     return () => botones.forEach(btn => btn.removeEventListener("click", manejarClick));
   }, []);
 
-  // === AGREGAR PRODUCTO AL CARRITO ===
+  // === Agregar producto al carrito ===
   const agregarAlCarrito = (producto) => {
     const existe = carrito.find(item => item.id === producto.id);
+
     if (existe) {
       const actualizado = carrito.map(item =>
         item.id === producto.id
@@ -74,12 +72,14 @@ const Productos = () => {
     }
   };
 
-  // === FILTRAR PRODUCTOS ===
+  // === Filtrar productos ===
   const productosFiltrados =
     categoriaSeleccionada === "todos"
       ? productos
       : productos.filter(p =>
-          p.menu.we.toLowerCase().includes(categoriaSeleccionada.toLowerCase())
+          p.categoria?.nombre
+            ?.toLowerCase()
+            .includes(categoriaSeleccionada.toLowerCase())
         );
 
   return (
@@ -98,8 +98,8 @@ const Productos = () => {
                 className="producto-imagen"
               />
               <h3 className="producto-titulo">{producto.titulo}</h3>
-              <p>{producto.categoria.nombre}</p>
-              <p>${producto.precio.toLocaleString()}</p>
+              <p>{producto.categoria?.nombre}</p>
+              <p>${producto.precio?.toLocaleString()}</p>
               <button
                 className="producto-agregar"
                 onClick={() => agregarAlCarrito(producto)}

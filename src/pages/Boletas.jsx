@@ -1,48 +1,65 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/main.css";
 import { useNavigate } from "react-router-dom";
+import useBoletas from "../hooks/useBoleta";
 
 function Boleta() {
     const [boletas, setBoletas] = useState([]);
     const navigate = useNavigate();
 
-    // Cargar boletas desde localStorage al montar el componente
+    // Importar funciones del microservicio
+    const { obtenerBoletas, eliminarBoleta } = useBoletas();
+
+    // Cargar boletas desde el microservicio
     useEffect(() => {
         cargarBoletas();
     }, []);
 
     /**
-     * Carga las boletas desde localStorage
+     * Llama a la API para obtener las boletas
      */
-    const cargarBoletas = () => {
-        const boletasGuardadas = JSON.parse(localStorage.getItem("boletasGuardadas")) || [];
-        setBoletas(boletasGuardadas);
-    };
-
-    /**
-     * Elimina una boleta específica según su índice
-     */
-    const eliminarBoleta = (index) => {
-        const confirmar = window.confirm(`¿Eliminar la Boleta #${boletas[index].id}?`);
-
-        if (confirmar) {
-            const nuevasBoletas = [...boletas];
-            nuevasBoletas.splice(index, 1);
-            localStorage.setItem("boletasGuardadas", JSON.stringify(nuevasBoletas));
-            setBoletas(nuevasBoletas);
+    const cargarBoletas = async () => {
+        try {
+            const response = await obtenerBoletas();
+            setBoletas(response.data);
+        } catch (error) {
+            console.error("Error al obtener boletas:", error);
         }
     };
 
     /**
-     * Borra todas las boletas del almacenamiento
+     * Elimina una boleta llamando al microservicio
      */
-    const borrarTodasBoletas = () => {
-        const confirmar = window.confirm("¿Seguro que deseas borrar todas las boletas?");
-        
+    const borrarBoleta = async (id) => {
+        const confirmar = window.confirm(`¿Eliminar la boleta #${id}?`);
+
         if (confirmar) {
-            localStorage.removeItem("boletasGuardadas");
-            setBoletas([]);
+            try {
+                await eliminarBoleta(id);
+                // Volvemos a cargar la lista desde el backend
+                cargarBoletas();
+            } catch (error) {
+                console.error("Error al eliminar boleta:", error);
+            }
+        }
+    };
+
+    /**
+     * Borra todas las boletas: solo funciona si tu API tiene endpoint DELETE ALL
+     */
+    const borrarTodasBoletas = async () => {
+        const confirmar = window.confirm("¿Seguro que deseas borrar todas las boletas?");
+
+        if (confirmar) {
+            try {
+                // Si tu backend NO tiene deleteAll, debo crear un loop
+                for (let boleta of boletas) {
+                    await eliminarBoleta(boleta.id);
+                }
+                cargarBoletas();
+            } catch (error) {
+                console.error("Error al borrar todas las boletas:", error);
+            }
         }
     };
 
@@ -50,15 +67,21 @@ function Boleta() {
         <main>
             <div className="contenedor-titulo">
                 <h2 className="titulo-principal">Historial de Boletas</h2>
+
                 <div className="admin-opciones">
-                    <button className="boton-admin" onClick={() => navigate("/admin")}>
+                    <button 
+                        className="boton-admin" 
+                        onClick={() => navigate("/admin")}
+                    >
                         Volver
                     </button>
-                    </div>
+                </div>
+
                 {boletas.length > 0 && (
                     <button 
-                        className="boleta-borrar-todas" 
-                        onClick={borrarTodasBoletas}>
+                        className="boleta-borrar-todas"
+                        onClick={borrarTodasBoletas}
+                    >
                         Borrar todas
                     </button>
                 )}
@@ -68,18 +91,21 @@ function Boleta() {
                 {boletas.length === 0 ? (
                     <p>No hay boletas registradas.</p>
                 ) : (
-                    boletas.map((boleta, index) => (
+                    boletas.map((boleta) => (
                         <div 
-                            key={`boleta-${boleta.id}-${index}`} 
-                            className="boleta-container">
+                            key={boleta.id}
+                            className="boleta-container"
+                        >
                             <div className="boleta-header">
                                 <h3>Boleta #{boleta.id}</h3>
                                 <button
                                     className="boleta-acciones-borrar"
-                                    onClick={() => eliminarBoleta(index)}>
+                                    onClick={() => borrarBoleta(boleta.id)}
+                                >
                                     Eliminar
                                 </button>
                             </div>
+
                             <p className="boletas_letras">
                                 <strong>Fecha:</strong> {boleta.fecha}
                             </p>
@@ -93,9 +119,9 @@ function Boleta() {
                                         <th>Subtotal</th>
                                     </tr>
                                 </thead>
-                                <tbody className="boleta-container ">
+                                <tbody>
                                     {boleta.productos.map((producto, idx) => (
-                                        <tr key={`producto-${idx}`}>
+                                        <tr key={idx}>
                                             <td>{producto.titulo}</td>
                                             <td>{producto.cantidad}</td>
                                             <td>${producto.precio.toLocaleString()}</td>
@@ -104,6 +130,7 @@ function Boleta() {
                                     ))}
                                 </tbody>
                             </table>
+
                             <p className="boleta-total">
                                 <strong>Total:</strong> ${boleta.total.toLocaleString()}
                             </p>

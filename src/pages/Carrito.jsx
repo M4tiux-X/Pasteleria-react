@@ -1,106 +1,115 @@
 import { useEffect, useState } from "react";
-import "../css/main.css";
 import React from "react";
-
+import "../css/main.css";
+import useCarrito from "../hooks/useCarrito";
+import useCarritoDetalle from "../hooks/useCarritoDetalle";
 
 const Carrito = () => {
-  const [carrito, setCarrito] = useState(() => {
-    return JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
-  });
+  const [carrito, setCarrito] = useState(null);
+  const [detalles, setDetalles] = useState([]);
 
-  const [boletas,setBoletas] = useState([]);
+  const { obtenerCarritoUsuario, crearCarrito } = useCarrito();
+  const { 
+    obtenerDetallePorCarrito,
+    agregarProducto,
+    actualizarCantidad,
+    eliminarDetalle
+  } = useCarritoDetalle();
 
-  // Recalcular total
-  const total = carrito.reduce(
-    (acc, producto) => acc + producto.precio * producto.cantidad,
+  const idUsuario = 1; // <-- debes reemplazar con usuario logeado
+
+  // =============================
+  //   1. CARGAR CARRITO
+  // =============================
+
+  useEffect(() => {
+    cargarCarrito();
+  }, []);
+
+  const cargarCarrito = async () => {
+    try {
+      // Buscar carrito del usuario
+      let res = await obtenerCarritoUsuario(idUsuario);
+
+      if (!res.data) {
+        // si no existe → crear
+        const nuevo = await crearCarrito({ usuarioId: idUsuario });
+        res = { data: nuevo.data };
+      }
+
+      setCarrito(res.data);
+
+      // cargar sus detalles
+      const det = await obtenerDetallePorCarrito(res.data.id);
+      setDetalles(det.data || []);
+
+    } catch (e) {
+      console.error("Error cargando carrito:", e);
+    }
+  };
+
+  // =============================
+  //   2. SUMAR / RESTAR CANTIDAD
+  // =============================
+
+  const incrementar = async (idDetalle, cantidadActual) => {
+    await actualizarCantidad(idDetalle, { cantidad: cantidadActual + 1 });
+    cargarCarrito();
+  };
+
+  const decrementar = async (idDetalle, cantidadActual) => {
+    if (cantidadActual === 1) {
+      await eliminarDetalle(idDetalle);
+    } else {
+      await actualizarCantidad(idDetalle, { cantidad: cantidadActual - 1 });
+    }
+    cargarCarrito();
+  };
+
+  // =============================
+  //   3. ELIMINAR PRODUCTO
+  // =============================
+
+  const eliminarProducto = async (idDetalle) => {
+    if (!window.confirm("¿Eliminar producto?")) return;
+
+    await eliminarDetalle(idDetalle);
+    cargarCarrito();
+  };
+
+  // =============================
+  //   4. VACIAR CARRITO
+  // =============================
+
+  const vaciarCarrito = async () => {
+    if (!window.confirm("¿Vaciar carrito?")) return;
+
+    for (const d of detalles) {
+      await eliminarDetalle(d.id);
+    }
+
+    cargarCarrito();
+  };
+
+  // =============================
+  //   5. TOTAL
+  // =============================
+
+  const total = detalles.reduce(
+    (acc, p) => acc + p.producto.precio * p.cantidad,
     0
   );
 
-  // Guardar carrito cada vez que cambie
-  useEffect(() => {
-    localStorage.setItem("productos-en-carrito", JSON.stringify(carrito));
-    const numerito = document.getElementById("numerito");
-    if (numerito)
-      numerito.textContent = carrito.reduce(
-        (acc, p) => acc + p.cantidad,
-        0
-      );
-  }, [carrito]);
+  // =============================
+  //   6. RENDER
+  // =============================
 
-  // === MANEJADORES ===
-
-  const incrementar = (id) => {
-    setCarrito((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, cantidad: p.cantidad + 1 } : p
-      )
-    );
-  };
-
-  const decrementar = (id) => {
-    setCarrito((prev) =>
-      prev
-        .map((p) =>
-          p.id === id
-            ? { ...p, cantidad: p.cantidad - 1 }
-            : p
-        )
-        .filter((p) => p.cantidad > 0)
-    );
-  };
-
-  const eliminarProducto = (id) => {
-    const prod = carrito.find((p) => p.id === id);
-    if (
-      window.confirm(
-        `¿Eliminar "${prod.titulo}" del carrito?`
-      )
-    ) {
-      setCarrito((prev) => prev.filter((p) => p.id !== id));
-    }
-  };
-
-  const vaciarCarrito = () => {
-    if (window.confirm("¿Vaciar carrito?")) {
-      setCarrito([]);
-    }
-  };
-
-  const comprar = () => {
-    if (carrito.length === 0) {
-      alert("El carrito está vacío");
-      return;
-    }
-    if (!window.confirm("¿Confirmas la compra?")) return;
-
-    const nuevaBoleta = {
-      id: Date.now(),
-      fecha: new Date().toLocaleString(),
-      productos: carrito,
-      total: total,
-    };
-
-    const boletasGuardadas =
-      JSON.parse(localStorage.getItem("boletasGuardadas")) || [];
-    const actualizadas = [...boletasGuardadas, nuevaBoleta];
-
-    localStorage.setItem(
-      "boletasGuardadas",
-      JSON.stringify(actualizadas)
-    );
-    setBoletas(actualizadas);
-    setCarrito([]);
-    alert("¡Compra realizada con éxito!");
-  };
-
-  // === RENDERIZADO ===
-
-  if (carrito.length === 0) {
+  if (!carrito || detalles.length === 0) {
     return (
       <main>
         <h2 className="titulo-principal">Carrito</h2>
         <p id="carrito-vacio">
-          Tu carrito está vacío <i className="bi bi-emoji-frown"></i>
+          Tu carrito está vacío 
         </p>
       </main>
     );
@@ -111,86 +120,66 @@ const Carrito = () => {
       <h2 className="titulo-principal">Carrito</h2>
 
       <div className="contenedor-carrito">
-        <div id="carrito-productos" className="carrito-productos">
-          {carrito.map((producto) => (
-            <div key={producto.id} className="carrito-producto">
+        <div className="carrito-productos">
+
+          {detalles.map(det => (
+            <div key={det.id} className="carrito-producto">
               <img
                 className="carrito-producto-imagen"
-                src={producto.imagen}
-                alt={producto.titulo}
+                src={det.producto.imagen}
+                alt={det.producto.titulo}
               />
 
               <div className="h3-carrito">
                 <small>Título</small>
-                <h3 className="h3-carrito">{producto.titulo}</h3>
+                <h3>{det.producto.titulo}</h3>
               </div>
 
               <div className="h3-carrito">
                 <small>Cantidad</small>
                 <div className="carrito-producto-cantidad-controles">
-                  <button
-                    onClick={() => decrementar(producto.id)}
-                    className="carrito-producto-restar"
-                  >
-                    -
-                  </button>
-                  <p>{producto.cantidad}</p>
-                  <button
-                    onClick={() => incrementar(producto.id)}
-                    className="carrito-producto-sumar"
-                  >
-                    +
-                  </button>
+                  <button onClick={() => decrementar(det.id, det.cantidad)}>-</button>
+                  <p>{det.cantidad}</p>
+                  <button onClick={() => incrementar(det.id, det.cantidad)}>+</button>
                 </div>
               </div>
 
               <div className="h3-carrito">
                 <small>Precio</small>
-                <p>${producto.precio.toLocaleString()}</p>
+                <p>${det.producto.precio.toLocaleString()}</p>
               </div>
 
               <div className="h3-carrito">
                 <small>Subtotal</small>
-                <p>
-                  ${(producto.precio * producto.cantidad).toLocaleString()}
-                </p>
+                <p>${(det.producto.precio * det.cantidad).toLocaleString()}</p>
               </div>
 
               <button
-                onClick={() => eliminarProducto(producto.id)}
+                onClick={() => eliminarProducto(det.id)}
                 className="carrito-producto-eliminar"
-                title="Eliminar producto completo"
               >
                 <i className="bi bi-trash3"></i>
               </button>
             </div>
           ))}
+
         </div>
 
-        <div id="carrito-acciones" className="carrito-acciones">
-          <div className="carrito-acciones-izquierda">
-            <button
-              id="carrito-acciones-vaciar"
-              className="carrito-acciones-vaciar"
-              onClick={vaciarCarrito}
-            >
-              Vaciar carrito
-            </button>
+        <div className="carrito-acciones">
+          <div>
+            <button onClick={vaciarCarrito}>Vaciar carrito</button>
           </div>
           <div className="carrito-acciones-derecha">
             <div className="carrito-acciones-total">
               <p>Total:</p>
-              <p id="total">${total.toLocaleString()}</p>
+              <p>${total.toLocaleString()}</p>
             </div>
-            <button
-              id="carrito-acciones-comprar"
-              className="carrito-acciones-comprar"
-              onClick={comprar}
-            >
+            <button onClick={() => alert("Aquí realizar compra con microservicio")}>
               Comprar ahora
             </button>
           </div>
         </div>
+
       </div>
     </main>
   );
